@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"> 
+<meta neme="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="vue.js"></script>
+<style>
+    img {
+        height: 300px;
+    }
+    .sazaeStyle {
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        height: 300px;
+        width: 100%;
+    }
+    #tgPara2Images {
+        height: 300px; 
+        text-align: center;
+        position: relative;
+    }
+    #myHand {
+        display: flex;
+        justify-content: space-around;
+        height: 200px;
+        width: 75vw;
+        margin: 0 auto;
+    }
+    #myHand input {
+        border: 2px solid black;
+        border-radius: 10px;
+        padding: 10px;
+        width: 25vw;
+        width: 200px;
+    }
+    #myHand input:hover {
+        opacity: 0.5;
+    }
+    .disable {
+        pointer-events: none;
+        opacity: 0.1;
+    }
+    button {
+        width: 30vw;
+        height: 5vh;
+        display: block;
+        margin: 20px auto;
+    }
+    p {
+        text-align: center;
+        font-weight: bold;
+    }
+    .com1 {
+        position: absolute;
+        top: 10%;
+        left: 3%;
+        transform: rotate(-20deg);
+        color: red;
+        font-size: 50px;
+    }
+    .com2 {
+        position: absolute;
+        top: 10%;
+        right: 3%;
+        transform: rotate(-20deg);
+        color: yellowgreen;
+        font-size: 50px;
+    }
+</style>
+</head>
+<body>
+    <div id="app">
+        <div id="sazaeSpace" v-bind:style="{backgroundImage:'url('+sazaeHand+')'}"
+        v-bind:class="sazaeStyle">
+        </div>
+        <div id="tgPara2Images" v-bind:style="{display:sazaeDisp}">
+            <img src="sazae/0.png" id="paraImage">
+        </div>
+        <div id="myHand" v-bind:class="disable">
+            <input type="image" src="img/gu.png" v-on:click="own(0)">
+            <input type="image" src="img/ch.png" v-on:click="own(1)">
+            <input type="image" src="img/pa.png" v-on:click="own(2)">
+        </div>
+        <button v-on:click="bet" v-bind:class="betClass">Bet</button>
+        <button v-on:click="reset" v-bind:class="resetClass">Reset</button>
+        <p>残り{{medal}}枚</p>
+        <p class="com1">{{comment}}</p>
+        <p class="com2">{{winComment}}</p>
+    </div>
+    <script>
+      $(function() {
+        var imgs = new Array();
+        var cnt = 3;       // 画像枚数
+        var speed = 100;   // ミリ秒(1秒=1000)
+        var start = 0;
+        var timerName;
+        
+        for (i=0; i<cnt; i++) {
+            imgs[i] = './sazae/'+ (i) +'.png';
+        }
+    
+        timerName = setInterval(pars2images, speed);   // 自動的に開始する場合はコメント外す
+    
+        // パラパラ実行
+        function pars2images() {
+            $("#paraImage").attr("src", imgs[start]);
+            start++;
+            if (start >= imgs.length) {
+                start = 0;
+            }
+        }
+      })
+
+      
+
+        new Vue({
+            el: "#app",
+                data: {
+                    medal: 10,
+                    sazaeDisp: "block",
+                    sazaeHand: "",
+                    sazaeStyle: "",
+                    disable: "disable",
+                    betClass: "",
+                    comment: "",
+                    winComment: "",
+                    resetClass: "disable",
+                },
+                methods: {
+                    bet: function(){
+                        if(this.medal == 0){
+                            this.disable = "disable";
+                        }else{
+                            this.medal--;
+                            this.disable = "";
+                            this.comment = "";
+                            this.winComment = "";
+                            this.betClass = "disable";
+                            this.sazaeDisp = "block";
+                            this.sazaeHand = "";
+                            this.sazaeStyle = "";
+                        }
+                        
+                    },
+                    own: function(whatHand){
+                        this.betClass = "";
+                        this.sazaeDisp="none";
+                        var a = Math.floor( Math.random() * 3 ) ;
+                        console.log(a);
+                        this.sazaeHand = "sazae/" + a + ".png";
+                        this.sazaeStyle = "sazaeStyle";
+                        var judge = (whatHand - a + 3) % 3;
+                        console.log(judge);
+                        if (judge == 0) {
+                            setTimeout(() =>{
+                                this.sazaeDisp = "block";
+                                this.sazaeStyle = "";
+                            },1000);
+                           
+                            this.betClass = "disable";
+                            this.comment = "あいこで....";
+                        } else if (judge == 2) {
+                            this.comment = "あなたの勝ち!";
+                            this.disable = "disable";
+                            var win = Math.floor( Math.random() * 3 + 1 ) ;
+                            this.medal += win;
+                            this.winComment = "メダル"+ win +"枚獲得!";
+                        } else if (judge == 1){
+                            this.comment = "あなたの負け!";
+                            this.disable = "disable";
+                            this.betClass = "disable";
+                            if(this.medal == 0){
+                                this.resetClass = "";
+                            }else{
+                                this.betClass = "";
+                            }
+                        }
+                    },
+                    reset: function(){
+                        this.medal = 10;
+                        this.resetClass = "disable";
+                        this.betClass = "";
+                    }
+                },
+                
+          
+        })
+    </script>
+</body>
+</html>
